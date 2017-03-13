@@ -1,5 +1,6 @@
-// Copyright (c) 2017, Patrick Borgeest. All rights reserved. Use of this source code
-// is governed by a BSD-style license that can be found in the LICENSE file.
+//	Copyright (c) 2017, Patrick Borgeest. All rights reserved.
+//	Use of this source code is governed by a BSD-style license
+//	that can be found in the LICENSE file.
 
 import 'dart:html';
 import 'dart:math';
@@ -149,8 +150,8 @@ class App {
     this._htmlNode.children.clear();
     this._state.appendElementsTo(this._htmlNode);
   }
-  /// Moves the app to the next state and then generates the markup
-  /// the new State deems appropriate.
+  /// Moves the app to the next state
+  /// and then generates the markup for that state.
   void displayNextState() {
     this._state = this._state.nextState();
     this._redraw();
@@ -161,6 +162,5 @@ App app;
 
 void main() {
   // The HTML in the index.html file has a DIV with 'output' as its ID.
-  // Initialise the app with the StartState.
   app = new App(querySelector('#output'), new StartState());
 }
