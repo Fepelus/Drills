@@ -1,5 +1,5 @@
 
-build: web/index.html web/main.dart web/styles.css
+build: web/index.html web/main.dart
 	pub build
 
 upload: build/web/main.dart.js 

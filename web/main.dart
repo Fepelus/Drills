@@ -5,17 +5,19 @@ import 'dart:html';
 import 'dart:math';
 import './data.dart';
 
-
+/// Represents a single pair of one question and one answer.
 class Drill {
   final String question, answer;
 
   Drill(this.question, this.answer);
 
-  Node questionDiv() {
+  /// Marks-up the question inside a DIV element.
+  Element questionDiv() {
     return _makeDiv('question', this.question);
   }
 
-  Node answerDiv() {
+  /// Marks-up the answer inside a DIV element.
+  Element answerDiv() {
     return _makeDiv('answer', this.answer);
   }
 
@@ -27,32 +29,45 @@ class Drill {
   }
 }
 
-
+/// Represents the collection of all available pairs of questions and answers.
 class Drills {
   List<Drill> _drills;
 
-  Drills() {
+  /// Fills the collection with the given data.
+  Drills(List<List<String>> inputDrillData) {
     this._drills = new List<Drill>();
-    data.forEach((drill) =>
-        this.add(drill.elementAt(0), drill.elementAt(1))
+    inputDrillData.forEach((drill) =>
+      this._drills.add(new Drill(drill.elementAt(0), drill.elementAt(1)))
     );
   }
-  void add(String question, String answer) {
-    this._drills.add(new Drill(question, answer));
-  }
+
+  /// Returns one of the entries in the collection chosen at random.
   Drill randomDrill() {
     final _random = new Random();
     return this._drills[_random.nextInt(this._drills.length)];
   }
 }
 
-
+/// Parent class of the two State objects.
 abstract class State {
+
+  /// Returns the State that must follow the current
+  /// State in this state machine.
   State nextState();
+
+  /// Returns all of the elements that should appear
+  /// when the app is in a particular state.
   List<Element> _elements();
+
+  /// Appends to the argument all of the elements that should
+  /// appear in a concrete state.
   void appendElementsTo(Element root) {
     this._elements().forEach((element) => root.append(element));
   }
+
+  /// Returns a button element that moves the app to the next state.
+  ///
+  /// Both concrete States needed this common code so it was pulled up.
   Element button() {
     Element button = new ButtonElement();
     button.text = "click";
@@ -61,13 +76,20 @@ abstract class State {
   }
 }
 
+/// Represents the state of the app when it is displaying the question
+/// only and is not showing the answer.
 class StartState extends State {
   Drill _currentDrill;
 
   StartState() {
-    this._currentDrill = new Drills().randomDrill();
+    // When the app changes to this state then a Drill to display is taken
+    // at random from the data.
+    this._currentDrill = new Drills(data).randomDrill();
   }
 
+  /// When the app is in the StartState then display the question
+  /// inside its DIV element and also a button that will move the
+  /// app to the next state.
   @override
   List<Element> _elements() {
     return [
@@ -76,18 +98,28 @@ class StartState extends State {
       ];
   }
 
+  /// The next state will be ResultState.
+  ///
+  /// The drill that was randomly chosen when this object was created
+  /// will here be passed to the ResultState so that the app can show
+  /// the right answer to the question.
   @override
   State nextState() {
     return new ResultState(this._currentDrill);
   }
 }
 
+/// Represents the state of the app when it is displaying the question
+/// along with its answer
 class ResultState extends State {
    Drill _currentDrill;
 
   ResultState(this._currentDrill);
 
-  @override
+   /// When the app is in the ResultState then display the question
+   /// inside its DIV element, the answer inside its DIV element,
+   /// and also a button that will move the app to the next state.
+   @override
   List<Element> _elements() {
     return [
       this._currentDrill.questionDiv(),
@@ -96,15 +128,20 @@ class ResultState extends State {
     ];
   }
 
+  /// The next state will be to return to the StartState.
   @override
   State nextState() {
     return new StartState();
   }
 }
 
+/// Represents the visual app in front of the user.
 class App {
+  /// The current State to be displayed
   State _state;
+  /// The Node to which the markup that this app generates is to be appended
   Element _htmlNode;
+  /// Draws the initial state
   App(this._htmlNode, this._state) {
     this._redraw();
   }
@@ -112,6 +149,8 @@ class App {
     this._htmlNode.children.clear();
     this._state.appendElementsTo(this._htmlNode);
   }
+  /// Moves the app to the next state and then generates the markup
+  /// the new State deems appropriate.
   void displayNextState() {
     this._state = this._state.nextState();
     this._redraw();
@@ -121,5 +160,7 @@ class App {
 App app;
 
 void main() {
+  // The HTML in the index.html file has a DIV with 'output' as its ID.
+  // Initialise the app with the StartState.
   app = new App(querySelector('#output'), new StartState());
 }
