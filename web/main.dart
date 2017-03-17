@@ -65,16 +65,6 @@ abstract class State {
   void appendElementsTo(Element root) {
     this._elements().forEach((element) => root.append(element));
   }
-
-  /// Returns a button element that moves the app to the next state.
-  ///
-  /// Both concrete States needed this common code so it was pulled up.
-  Element button() {
-    Element button = new ButtonElement();
-    button.text = "click";
-    button.onClick.listen((e) => app.displayNextState());
-    return button;
-  }
 }
 
 /// Represents the state of the app when it is displaying the question
@@ -95,7 +85,7 @@ class StartState extends State {
   List<Element> _elements() {
     return [
       this._currentDrill.questionDiv(),
-      this.button()
+      new NextStateButton().element()
       ];
   }
 
@@ -125,7 +115,7 @@ class ResultState extends State {
     return [
       this._currentDrill.questionDiv(),
       this._currentDrill.answerDiv(),
-      this.button()
+      new NextStateButton().element()
     ];
   }
 
@@ -134,6 +124,21 @@ class ResultState extends State {
   State nextState() {
     return new StartState();
   }
+}
+
+/// A button that tells the app to move to the next state
+class NextStateButton {
+  Element _button;
+  NextStateButton() {
+	this._button = new ButtonElement();
+    this._button.text = "click";
+    this._button.onClick.listen((e) => app.displayNextState());
+  }
+
+  Element element() {
+    return this._button;
+  }
+
 }
 
 /// Represents the visual app in front of the user.
@@ -158,6 +163,7 @@ class App {
   }
 }
 
+// on the global object so that the NextStateButton can call it
 App app;
 
 void main() {
